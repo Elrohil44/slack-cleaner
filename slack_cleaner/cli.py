@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-
+import os
 from datetime import datetime
 import logging
 import pprint
 import sys
 import time
 
-from slacker import Slacker
+from slack_sdk import WebClient
 
 from slack_cleaner import __version__
 from slack_cleaner.utils import Colors, Counter, TimeRange
@@ -18,7 +18,7 @@ args = Args()
 time_range = TimeRange(args.start_time, args.end_time)
 
 # Nice slack API wrapper
-slack = Slacker(args.token)
+client = WebClient(token=args.token)
 
 # So we can print slack's object beautifully
 pp = pprint.PrettyPrinter(indent=4)
@@ -49,13 +49,14 @@ user_dict = {}
 
 # Construct a local user dict for further usage
 def init_user_dict():
-    res = slack.users.list().body
+    res = client.users_list()
     if not res['ok']:
         return
     members = res['members']
 
     for m in members:
         user_dict[m['id']] = m['name']
+
 
 # Init user dict
 init_user_dict()
@@ -74,18 +75,12 @@ def clean_channel(channel_id, time_range, user_id=None, bot=False):
 
     _api_end_point = None
     # Set to the right API end point
-    if args.channel_name:
-        _api_end_point = slack.channels.history
-    elif args.direct_name:
-        _api_end_point = slack.im.history
-    elif args.group_name:
-        _api_end_point = slack.groups.history
-    elif args.mpdirect_name:
-        _api_end_point = slack.mpim.history
+    if args.channel_name or args.direct_name or args.group_name or args.mpdirect_name:
+        _api_end_point = client.conversations_history
 
     has_more = True
     while has_more:
-        res = _api_end_point(channel_id, latest, oldest).body
+        res = _api_end_point(channel_id, latest, oldest)
         if not res['ok']:
             logger.error('Error occurred on Slack\'s API:')
             pp.pprint(res)
@@ -138,7 +133,7 @@ def delete_message_on_channel(channel_id, message):
         try:
             # No response is a good response
             # FIXME: Why this behaviour differ from Slack's documentation?
-            slack.chat.delete(channel_id, message['ts'])
+            client.chat_delete(channel_id, message['ts'])
         except:
             logger.error(Colors.YELLOW + 'Failed to delete ->' + Colors.ENDC)
             pp.pprint(message)
@@ -173,8 +168,8 @@ def remove_files(time_range, user_id=None, types=None):
 
     has_more = True
     while has_more:
-        res = slack.files.list(user=user_id, ts_from=oldest, ts_to=latest,
-                               types=types, page=page).body
+        res = client.files_list(user=user_id, ts_from=oldest, ts_to=latest,
+                                types=types, page=page)
 
         if not res['ok']:
             logger.error('Error occurred on Slack\'s API:')
@@ -200,7 +195,7 @@ def delete_file(file):
     if args.perform:
         try:
             # No response is a good response
-            slack.files.delete(file['id'])
+            client.files_delete(file['id'])
         except:
             logger.error(Colors.YELLOW + 'Failed to delete ->' + Colors.ENDC)
             pp.pprint(file)
@@ -227,7 +222,7 @@ def get_user_id_by_name(name):
 
 
 def get_channel_id_by_name(name):
-    res = slack.channels.list().body
+    res = client.conversations_list(types="public_channel,private_channel")
     if not res['ok']:
         return
     channels = res['channels']
@@ -236,7 +231,7 @@ def get_channel_id_by_name(name):
 
 
 def get_direct_id_by_name(name):
-    res = slack.im.list().body
+    res = client.conversations_list(types="im")
     if not res['ok']:
         return
     ims = res['ims']
@@ -248,7 +243,7 @@ def get_direct_id_by_name(name):
 
 
 def get_mpdirect_id_by_name(name):
-    res = slack.mpim.list().body
+    res = client.conversations_list(types="mpim")
     # create set of user ids
     members = set([get_user_id_by_name(x) for x in name.split(',')])
 
@@ -265,7 +260,7 @@ def get_mpdirect_id_by_name(name):
 
 
 def get_group_id_by_name(name):
-    res = slack.groups.list().body
+    res = client.conversations_list(types="private_channel")
     if not res['ok']:
         return
     groups = res['groups']

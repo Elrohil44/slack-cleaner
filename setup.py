@@ -30,7 +30,7 @@ setup(
 
     install_requires=[
         'setuptools',
-        'slacker',
+        'slack-sdk',
         ] + install_requires,
 
     entry_points={
