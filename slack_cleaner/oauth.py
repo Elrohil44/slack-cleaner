@@ -3,7 +3,6 @@ import webbrowser
 
 from slack_sdk import WebClient
 from slack_sdk.oauth import AuthorizeUrlGenerator
-from slack_sdk.oauth.installation_store import FileInstallationStore, Installation
 from slack_sdk.oauth.state_store import FileOAuthStateStore
 from flask import Flask, request, make_response
 from threading import Timer
@@ -27,8 +26,7 @@ app = Flask(__name__)
 server = None
 token = None
 args = None
-state_store = FileOAuthStateStore(expiration_seconds=300, base_dir="./data")
-installation_store = FileInstallationStore(base_dir="./data")
+state_store = FileOAuthStateStore(expiration_seconds=300, base_dir="./slack-cleaner-data")
 
 
 @app.route("/slack/install", methods=["GET"])
