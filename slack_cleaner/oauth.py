@@ -17,7 +17,7 @@ redirect_uri = "http://localhost:23001/slack/oauth"
 authorize_url_generator = AuthorizeUrlGenerator(
         authorization_url="https://slack.com/oauth/authorize",
         client_id=client_id,
-        scopes=["identify", "users:read"],
+        scopes=["identify", "users:read", "channels:read", "groups:read", "mpim:read", "im:read", "channels:history","groups:history","mpim:history","im:history", "chat:write:bot"],
         user_scopes=["users:read", "channels:read", "channels:history", "chat:write", "groups:history", "groups:read", "im:history", "im:read", "mpim:history", "mpim:read"],
         redirect_uri=redirect_uri
     )

@@ -51,7 +51,7 @@ def clean_channel(channel_id, time_range, user_id=None, bot=False):
 
     has_more = True
     while has_more:
-        res = _api_end_point(channel=channel_id, oldest=oldest)
+        res = _api_end_point(channel=channel_id, oldest=oldest, latest=latest)
         if not res['ok']:
             logger.error('Error occurred on Slack\'s API:')
             pp.pprint(res)
