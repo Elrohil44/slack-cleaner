@@ -8,7 +8,7 @@ class Args():
         p = argparse.ArgumentParser(prog='slack-cleaner')
 
         # Token
-        p.add_argument('--token', required=True,
+        p.add_argument('--token', required=False,
                        help='Slack API token (https://api.slack.com/web)')
 
         # Log

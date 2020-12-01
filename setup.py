@@ -16,7 +16,7 @@ setup(
     author=metadata['author'],
     author_email=metadata['authoremail'],
     version=metadata['version'],
-    url='https://github.com/kfei/slack-cleaner',
+    url='https://github.com/Elrohil44/slack-cleaner',
     license="MIT",
     keywords="slack, clean, delete, message, file",
     long_description=description,
@@ -30,7 +30,8 @@ setup(
 
     install_requires=[
         'setuptools',
-        'slack-sdk',
+        'slack_sdk',
+        'flask',
         ] + install_requires,
 
     entry_points={
